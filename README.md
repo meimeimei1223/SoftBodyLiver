@@ -2,6 +2,7 @@
 
 A real-time simulation of soft liver tissue using Extended Position Based Dynamics (XPBD) to recreate the physical behavior of liver tissue.
 
+[![Watch the demo on YouTube](https://img.youtube.com/vi/UJDAcehueAY/maxresdefault.jpg)](https://youtu.be/UJDAcehueAY "Watch the SoftBodyLiver simulation in action")
 ## Overview
 
 SoftBodyLiver is a C++ project designed to simulate the physical behavior of soft tissues like the liver in an interactive manner. It can be applied to various fields such as medical training, surgical simulation, and educational purposes.
