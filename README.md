@@ -2,7 +2,11 @@
 
 A real-time simulation of soft liver tissue using Extended Position Based Dynamics (XPBD) to recreate the physical behavior of liver tissue.
 
-[![Watch the demo on YouTube](https://img.youtube.com/vi/UJDAcehueAY/maxresdefault.jpg)](https://youtu.be/UJDAcehueAY "Watch the SoftBodyLiver simulation in action")
+
+## 🎥 Demo Video
+
+[![Watch the demo on YouTube](https://img.youtube.com/vi/UJDAcehueAY/hqdefault.jpg)](https://youtu.be/UJDAcehueAY "Watch the SoftBodyLiver simulation in action")
+
 
 
 ## Overview
