@@ -152,7 +152,6 @@ public:
                     result.distance = t;
                     result.position = ray.origin + ray.direction * t;
                     result.hitObject = &mesh;
-                    mesh.setHighlightedTriangle(i / 3);
                 }
             }
         }
@@ -288,6 +287,8 @@ void glfw_onMouseScroll(GLFWwindow* window, double deltaX, double deltaY);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void showFPS(GLFWwindow* window);
 
+// Add bunny as a global variable to be accessible from the key handler
+SoftBody* bunny = nullptr;
 
 int main() {
     // Initialize OpenGL
@@ -309,8 +310,15 @@ int main() {
     std::string tetfilepath = "../../../model/liver_tetrahedral_mesh.txt";
     SoftBody::MeshData tetmesh = SoftBody::loadTetMesh(tetfilepath);
 
-    // Initialize softbody
-    SoftBody bunny(tetmesh,liver_mesh, 1.0f, 0.0f);
+    // Initialize softbody with Neohookean compliance
+    // 第3引数: エッジコンプライアンス
+    // 第4引数: 体積コンプライアンス
+    // 第5引数: Neohookeanコンプライアンス
+    bunny = new SoftBody(tetmesh, liver_mesh, 0.0001f, 0.0001f, 10.0f);
+
+    // Set material parameters (Young's modulus, Poisson's ratio)
+    // 肝臓のようなやわらかい臓器の物性値を設定
+    bunny->setMaterialParameters(2000.0f, 0.49f);
 
     // Physics parameters
     float dt = 1.0f / 60.0f;
@@ -319,7 +327,7 @@ int main() {
     // Initialize grabber
     Grabber grabber;
     gGrabber = &grabber;
-    gGrabber->setPhysicsObject(&bunny);
+    gGrabber->setPhysicsObject(bunny);
 
     // Set mouse button callback
     glfwSetMouseButtonCallback(gWindow, mouse_button_callback);
@@ -339,7 +347,7 @@ int main() {
 
         // Update model matrix
         model = glm::translate(glm::mat4(1.0f), OrbitCam.cameraTarget);
-        bunny.setModelMatrix(model);
+        bunny->setModelMatrix(model);
 
         // Update projection matrix
         projection = glm::perspective(glm::radians(OrbitCam.gFOV),
@@ -359,19 +367,19 @@ int main() {
         float stepDt = dt / float(numSubsteps);
 
         for (int i = 0; i < numSubsteps; i++) {
-            bunny.preSolve(stepDt, gravity);
-            bunny.solve(stepDt);
-            bunny.postSolve(stepDt);
+            bunny->preSolve(stepDt, gravity);
+            bunny->solve(stepDt);
+            bunny->postSolve(stepDt);
         }
 
-        bunny.updateTetMeshes();
-        bunny.updateVisMesh();
-        bunny.draw_Vis(shaderProgram);
-        bunny.drawTetMesh(shaderProgram);
+        bunny->updateTetMeshes();
+        bunny->updateVisMesh();
+        bunny->draw_Vis(shaderProgram);
+        bunny->drawTetMesh(shaderProgram);
 
         // Shape restoration if needed
         if (restore) {
-            bunny.applyShapeRestoration(1.0);
+            bunny->applyShapeRestoration(1.0);
             restore = false;
         }
 
@@ -443,6 +451,57 @@ void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mode)
 
     if (key == GLFW_KEY_F2 && action == GLFW_PRESS) {
         restore = true;
+    }
+
+    // ここからは新しいキー操作
+    // F3キー: エッジ拘束のみを使用
+    if (key == GLFW_KEY_F3 && action == GLFW_PRESS) {
+        bunny->setEdgeCompliance(1.0f);  // エッジ拘束を有効化
+        bunny->setVolCompliance(0.0f);   // 体積拘束を無効化
+        bunny->setNeoCompliance(0.0f);   // Neohookean拘束を無効化
+        std::cout << "Edge constraints only" << std::endl;
+    }
+
+    // F4キー: 体積拘束のみを使用
+    if (key == GLFW_KEY_F4 && action == GLFW_PRESS) {
+        bunny->setEdgeCompliance(0.0f);   // エッジ拘束を無効化
+        bunny->setVolCompliance(1.0f);    // 体積拘束を有効化
+        bunny->setNeoCompliance(0.0f);    // Neohookean拘束を無効化
+        std::cout << "Volume constraints only" << std::endl;
+    }
+
+    // F5キー: Neohookean拘束のみを使用
+    if (key == GLFW_KEY_F5 && action == GLFW_PRESS) {
+        bunny->setEdgeCompliance(0.0f);    // エッジ拘束を無効化
+        bunny->setVolCompliance(0.0f);     // 体積拘束を無効化
+        bunny->setNeoCompliance(1.0f);     // Neohookean拘束を有効化
+        std::cout << "Neohookean constraints only" << std::endl;
+    }
+
+    // F6キー: すべての拘束を使用
+    if (key == GLFW_KEY_F6 && action == GLFW_PRESS) {
+        bunny->setEdgeCompliance(1.0f);    // エッジ拘束を有効化
+        bunny->setVolCompliance(1.0f);     // 体積拘束を有効化
+        bunny->setNeoCompliance(1.0f);     // Neohookean拘束を有効化
+        std::cout << "All constraints enabled" << std::endl;
+    }
+
+    // 1キー: 柔らかい材料
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+        bunny->setMaterialParameters(10.0f, 0.45f);  // 柔らかい材料（ゴムのような）
+        std::cout << "Soft material" << std::endl;
+    }
+
+    // 2キー: 中程度の硬さ
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+        bunny->setMaterialParameters(1000.0f, 0.45f);  // 中程度の硬さ
+        std::cout << "Medium material" << std::endl;
+    }
+
+    // 3キー: 硬い材料
+    if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+        bunny->setMaterialParameters(10000000.0f, 0.45f);  // 硬い材料（プラスチックのような）
+        std::cout << "Hard material" << std::endl;
     }
 }
 
