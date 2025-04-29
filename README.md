@@ -1,13 +1,10 @@
 # SoftBodyLiver
 
-A real-time simulation of soft liver tissue using Extended Position Based Dynamics (XPBD) to recreate the physical behavior of liver tissue.
-
+A real-time simulation of soft liver tissue using Extended Position Based Dynamics (XPBD) with Neo-Hookean material model to recreate the physical behavior of liver tissue.
 
 ## 🎥 Demo Video
 
 [![Watch the demo on YouTube](https://img.youtube.com/vi/UJDAcehueAY/hqdefault.jpg)](https://youtu.be/UJDAcehueAY "Watch the SoftBodyLiver simulation in action")
-
-
 
 ## Overview
 
@@ -17,10 +14,13 @@ SoftBodyLiver is a C++ project designed to simulate the physical behavior of sof
 
 - Tetrahedral mesh-based deformation
 - Stable simulation using Extended Position Based Dynamics (XPBD)
+- **Neo-Hookean material model for realistic non-linear elasticity**
 - Real-time interactive deformation
 - Intuitive mouse-based interaction (grab and drag)
 - Separation of visual mesh and physics simulation mesh
 - 3D rendering with OpenGL
+- **Dynamic switching between constraint types**
+- **Adjustable material properties (Young's modulus, Poisson's ratio)**
 
 ## Technologies
 
@@ -73,6 +73,13 @@ cd build/bin
 - ESC: Exit
 - F1: Toggle wireframe display
 - F2: Reset liver shape
+- **F3: Use edge constraints only**
+- **F4: Use volume constraints only**
+- **F5: Use Neo-Hookean constraints only**
+- **F6: Enable all constraints**
+- **1: Set soft material properties**
+- **2: Set medium material properties**
+- **3: Set hard material properties**
 
 ## Implementation Details
 
@@ -82,7 +89,19 @@ cd build/bin
 - Tetrahedral elements for volumetric deformation
 - Edge constraints to maintain structural integrity
 - Volume preservation constraints to simulate incompressible soft tissues
+- **Neo-Hookean material model for physically accurate non-linear elasticity**
+- **simplified inversion handling of inverted elements for robust simulation**
 - Spatial hashing for efficient collision detection
+
+### Neo-Hookean Material Model
+
+The Neo-Hookean material model is a hyperelastic, non-linear constitutive model that accurately captures the behavior of soft tissues under large deformations:
+
+- Uses Young's modulus and Poisson's ratio to define material properties
+- Handles both small and large deformations appropriately
+- Properly maintains volume under compression
+- Robustly handles element inversion
+- Based on continuum mechanics principles with physically accurate behavior
 
 ### Rendering System
 
@@ -103,6 +122,7 @@ cd build/bin
 - `src/`: Source files
   - `main.cpp`: Application entry point and main loop
   - `SoftBody.h/cpp`: Core simulation classes
+  - **`NeohookeanConstraint.h/cpp`: Neo-Hookean material model implementation**
   - `VectorMath.h`: Utility functions for vector operations
   - `Hash.h`: Spatial hashing for efficient collision detection
   - `ShaderProgram.h/cpp`: OpenGL shader management
@@ -138,7 +158,19 @@ This project incorporates and references work from Matthias Mueller:
    www.matthiasMueller.info/tenMinutePhysics
    ```
 
-Both components are used under the MIT License, which allows for modification and redistribution with proper attribution.
+3. **XPBD Implementation**: The Extended Position Based Dynamics algorithm is based on:
+   ```
+   Macklin, M., Müller, M., & Chentanez, N. (2016). XPBD: Position-based simulation of compliant constrained dynamics. 
+   In Proceedings of the 9th International Conference on Motion in Games (pp. 49-54).
+   ```
+
+4. **Neo-Hookean Material Model**: The implementation is inspired by:
+   ```
+   Irving, G., Teran, J., & Fedkiw, R. (2004). Invertible finite elements for robust simulation of large deformation. 
+   In Proceedings of the ACM SIGGRAPH/Eurographics symposium on Computer animation (pp. 131-140).
+   ```
+
+All components are used under the MIT License, which allows for modification and redistribution with proper attribution.
 
 ## Future Plans
 
@@ -147,6 +179,7 @@ Both components are used under the MIT License, which allows for modification an
 - Real-time surgical cutting simulation
 - Multi-tissue interaction with varying material properties
 - GPU acceleration for improved performance
+- Material parameter calibration using experimental data
 
 ## Author
 
